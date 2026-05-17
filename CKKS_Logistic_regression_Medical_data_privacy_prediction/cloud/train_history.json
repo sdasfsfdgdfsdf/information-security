@@ -1,0 +1,32 @@
+[
+  {
+    "model_id": "Heart Disease Predictions",
+    "dataset_name": "Heart Disease Predictions",
+    "train_time": 1093.55,
+    "timestamp": "2026-05-11 23:00:13"
+  },
+  {
+    "model_id": "Breast Cancer Wisconsin",
+    "dataset_name": "Breast Cancer Wisconsin",
+    "train_time": 2407.67,
+    "timestamp": "2026-05-12 02:08:50"
+  },
+  {
+    "model_id": "Heart Disease Predictions",
+    "dataset_name": "Heart Disease Predictions",
+    "train_time": 894.16,
+    "timestamp": "2026-05-12 03:05:10"
+  },
+  {
+    "model_id": "heart_cleveland_upload",
+    "dataset_name": "heart_cleveland_upload",
+    "train_time": 880.7,
+    "timestamp": "2026-05-12 03:19:51"
+  },
+  {
+    "model_id": "Pima Indians Diabetes Database",
+    "dataset_name": "Pima Indians Diabetes Database",
+    "train_time": 1577.6,
+    "timestamp": "2026-05-12 03:46:08"
+  }
+]
