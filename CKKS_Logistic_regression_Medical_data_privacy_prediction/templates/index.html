@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私保护预测系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🔒</span>
+                <span class="brand-text">隐私保护预测系统</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-link" data-page="home" onclick="showPage('home')">首页</button>
+                <button class="nav-link" data-page="patient" onclick="showPage('patient')">患者</button>
+                <button class="nav-link" data-page="hospital" onclick="showPage('hospital')">医院</button>
+                <button class="nav-link" data-page="cloud" onclick="showPage('cloud')">云计算中心</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 首页 -->
+        <div id="home-page" class="page">
+            <div class="hero-section">
+                <h1 class="hero-title">基于CKKS全同态加密的医疗数据隐私保护预测系统</h1>
+                <p class="hero-subtitle">全程密态运算，保障数据安全</p>
+            </div>
+
+            <div class="role-cards-section">
+                <div class="role-cards-grid">
+                    <div class="role-card-large" onclick="showPage('patient')">
+                        <div class="role-icon-large">👤</div>
+                        <h3 class="role-name-large">患者</h3>
+                        <p class="role-desc-large">使用公钥加密个人健康数据，请求密文预测，生成授权令牌</p>
+                    </div>
+                    <div class="role-card-large" onclick="showPage('hospital')">
+                        <div class="role-icon-large">🏨</div>
+                        <h3 class="role-name-large">医院</h3>
+                        <p class="role-desc-large">管理CKKS密钥对，上传训练数据，使用授权令牌解密预测结果</p>
+                    </div>
+                    <div class="role-card-large" onclick="showPage('cloud')">
+                        <div class="role-icon-large">☁️</div>
+                        <h3 class="role-name-large">云计算中心</h3>
+                        <p class="role-desc-large">执行密文模型训练，提供密文预测服务，存储加密模型</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 患者端 -->
+        <div id="patient-page" class="page hidden">
+            <div class="page-header">
+                <h2 class="page-title">👤 患者端</h2>
+            </div>
+
+            <div class="content-grid">
+                <!-- 左侧：操作区 -->
+                <div class="panel-area">
+                    <!-- 向医院申请公钥 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔑</span>
+                            <h3 class="panel-title">向医院端申请公钥</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>患者ID</label>
+                                <input type="text" id="patient-apply-id" placeholder="请输入患者ID">
+                            </div>
+                            <button class="btn btn-primary" id="patient-apply-btn" onclick="patientApplyPublicKey()">向医院端申请公钥</button>
+                            <div id="patient-apply-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 加载加密标准 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📊</span>
+                            <h3 class="panel-title">加载加密标准</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">从医院端加载公开的标准化参数文件：</p>
+                            <div id="patient-norm-params-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <button class="btn btn-primary" onclick="patientLoadNormParams()" style="margin-top: 10px;">加载选中的加密标准</button>
+                            <div id="patient-norm-params-result" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 加密查询数据 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔐</span>
+                            <h3 class="panel-title">加密查询数据</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>选择要加密的CSV文件</label>
+                                <div id="patient-csv-list" style="margin-bottom: 10px; max-height: 120px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                    <div style="color: #8c8c8c;">加载中...</div>
+                                </div>
+                                <button class="btn btn-primary" onclick="patientLoadCSVFiles()" style="margin-top: 10px;">刷新文件列表</button>
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>选择数据集</label>
+                                <select id="patient-csv-select" class="form-select">
+                                    <option value="">请选择CSV文件...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>患者ID</label>
+                                <input type="text" id="patient-encrypt-id" placeholder="请输入患者ID">
+                            </div>
+                            <div class="form-group">
+                                <label>请求ID（留空自动生成）</label>
+                                <input type="text" id="patient-encrypt-request-id" placeholder="留空自动生成">
+                            </div>
+                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" id="patient-encrypt-btn" onclick="patientEncryptData()">加密选中的文件</button>
+                            </div>
+                            <div id="patient-encrypt-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 密文预测请求 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📝</span>
+                            <h3 class="panel-title">密文预测请求</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>请求ID</label>
+                                <input type="text" id="patient-request-id" placeholder="请输入请求ID">
+                            </div>
+                            <div class="form-group">
+                                <label>患者ID</label>
+                                <input type="text" id="patient-predict-id" placeholder="请输入患者ID">
+                            </div>
+                            <div class="form-group">
+                                <label>选择模型</label>
+                                <select id="patient-model-select" class="form-select">
+                                    <option value="">请选择模型...</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="patient-predict-btn" onclick="patientRequestPredict()">发送预测请求</button>
+                            <div id="patient-predict-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 密文预测进度 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">⏳</span>
+                            <h3 class="panel-title">密文预测进度</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>请求ID</label>
+                                <input type="text" id="patient-check-id" placeholder="请输入请求ID">
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="patientCheckStatus()">刷新状态</button>
+                                <button class="btn btn-secondary" onclick="patientClearFields()">清空</button>
+                            </div>
+                            <div id="patient-predict-progress" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 申请解密预测结果 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔓</span>
+                            <h3 class="panel-title">申请解密预测结果</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>患者ID</label>
+                                <input type="text" id="patient-decrypt-id" placeholder="请输入患者ID">
+                            </div>
+                            <div class="form-group">
+                                <label>预测ID</label>
+                                <input type="text" id="patient-decrypt-prediction-id" placeholder="请输入预测ID">
+                            </div>
+                            <div class="form-group">
+                                <label>选择模型</label>
+                                <select id="patient-decrypt-model-select" class="form-select">
+                                    <option value="">请选择模型...</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="patient-decrypt-btn" onclick="patientRequestDecrypt()">向医院端申请解密</button>
+                            <div id="patient-decrypt-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：日志区 -->
+                <div class="log-area">
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📝</span>
+                            <h3 class="panel-title">操作日志</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="patient-log" class="log-container">
+                                <div class="log-entry log-info">欢迎使用患者端功能</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 医院端 -->
+        <div id="hospital-page" class="page hidden">
+            <div class="page-header">
+                <h2 class="page-title">🏨 医院端</h2>
+            </div>
+
+            <div class="content-grid">
+                <!-- 左侧：操作区 -->
+                <div class="panel-area">
+                    <!-- CKKS密钥生成 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔑</span>
+                            <h3 class="panel-title">CKKS密钥生成</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">生成CKKS密钥对并管理：</p>
+                            <button class="btn btn-primary" onclick="hospitalGenerateKeys()">生成密钥对</button>
+                            <div id="hospital-key-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 选择加密数据 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📊</span>
+                            <h3 class="panel-title">选择并加密数据</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">选择医院脱敏后的CSV文件：</p>
+                            <div id="hospital-data-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="hospitalLoadDataFiles()">刷新文件列表</button>
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>选择要加密的数据集</label>
+                                <select id="hospital-data-select" class="form-select">
+                                    <option value="">请选择CSV文件...</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-primary" id="hospital-encrypt-btn" onclick="hospitalEncryptData()">加密选中的数据集</button>
+                            </div>
+                            <div id="hospital-encrypt-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 上传加密训练数据到云端 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">☁️</span>
+                            <h3 class="panel-title">上传加密训练数据到云端</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">选择已加密的数据集文件上传到云端：</p>
+                            <div id="hospital-encrypted-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="hospitalLoadEncryptedFiles()">刷新文件列表</button>
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>选择要上传的加密文件</label>
+                                <select id="hospital-encrypted-select" class="form-select">
+                                    <option value="">请选择加密文件...</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-primary" id="hospital-upload-btn" onclick="hospitalUploadEncrypted()">上传选中的加密数据到云端</button>
+                            </div>
+                            <div id="hospital-upload-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 患者公钥申请列表 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">👤</span>
+                            <h3 class="panel-title">患者公钥申请列表</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">查看患者的公钥申请记录：</p>
+                            <div id="hospital-apply-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">暂无申请记录...</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-primary" onclick="hospitalLoadApplyList()">刷新申请列表</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 患者解密申请列表 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔓</span>
+                            <h3 class="panel-title">患者解密申请列表</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">查看患者的解密申请记录：</p>
+                            <div id="hospital-decrypt-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">暂无申请记录...</div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="hospitalLoadDecryptList()">刷新申请列表</button>
+                                <button class="btn btn-success" id="hospital-decrypt-btn" onclick="hospitalDecryptPrediction()">解密预测结果</button>
+                            </div>
+                            <div id="hospital-decrypt-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：日志区 -->
+                <div class="log-area">
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📝</span>
+                            <h3 class="panel-title">操作日志</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="hospital-log" class="log-container">
+                                <div class="log-entry log-info">欢迎使用医院端功能</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 云计算中心 -->
+        <div id="cloud-page" class="page hidden">
+            <div class="page-header">
+                <h2 class="page-title">☁️ 云计算中心</h2>
+            </div>
+
+            <div class="content-grid">
+                <!-- 左侧：操作区 -->
+                <div class="panel-area">
+                    <!-- 密钥管理 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🔑</span>
+                            <h3 class="panel-title">密钥管理</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">加载医院端公开的运算环境参数：</p>
+                            <button class="btn btn-primary" id="cloud-load-key-btn" onclick="cloudLoadPublicKey()">加载医院端公钥</button>
+                            <div id="cloud-key-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 训练管理 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">⚙️</span>
+                            <h3 class="panel-title">训练管理</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">选择云端加密训练数据集：</p>
+                            <div id="cloud-dataset-list" style="margin-bottom: 10px; max-height: 120px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="cloudLoadDatasets()">刷新列表</button>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label style="display: block; margin-bottom: 5px;">选择要训练的数据集：</label>
+                            <select id="cloud-dataset-select" class="form-select" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">请选择数据集...</option>
+                            </select>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-primary" id="cloud-train-btn" onclick="cloudTrain()">触发训练</button>
+                            <button class="btn btn-success" id="cloud-train-all-btn" onclick="cloudTrainAll()">🚀 一键训练所有</button>
+                        </div>
+                        <div id="cloud-train-result" class="result-box hidden" style="margin-top: 15px;"></div>
+                    </div>
+
+                    <!-- 模型管理 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">🤖</span>
+                            <h3 class="panel-title">模型管理</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">查看云端已训练的模型：</p>
+                            <div id="cloud-model-list" style="margin-bottom: 10px; max-height: 120px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-primary btn-sm" onclick="cloudLoadModels()">刷新模型列表</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 预测请求管理 -->
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📋</span>
+                            <h3 class="panel-title">预测请求管理</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p style="margin-bottom: 10px; color: #666;">查看并处理患者的预测请求：</p>
+                            <div id="cloud-prediction-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <div style="color: #8c8c8c;">加载中...</div>
+                            </div>
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="btn btn-primary" onclick="cloudLoadPredictionRequests()">刷新请求列表</button>
+                            </div>
+                            <div id="cloud-predict-status" class="result-box hidden" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：日志区 -->
+                <div class="log-area">
+                    <div class="panel-box">
+                        <div class="panel-header-box">
+                            <span class="panel-icon">📝</span>
+                            <h3 class="panel-title">操作日志</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="cloud-log" class="log-container">
+                                <div class="log-entry log-info">欢迎使用云计算中心功能</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
