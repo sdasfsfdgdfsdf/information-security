@@ -323,7 +323,7 @@ cryptography>=3.4.0
 ## 📞 联系方式
 
 - 项目地址：[https://github.com/sdasfsfdgdfsdf/securetranapp](https://github.com/sdasfsfdgdfsdf/securetranapp)
-- Issue 反馈：<https://github.com/sdasfsfdgdfsdf名/securetranapp/issues>
+- Issue 反馈：<https://github.com/sdasfsfdgdfsdf/securetranapp/issues>
 
 ## 🙏 致谢
 
