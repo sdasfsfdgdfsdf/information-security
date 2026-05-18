@@ -360,3 +360,9 @@ CKKS_Logistic_regression_Medical_data_privacy_prediction/
 ---
 
 **⚠️ 注意**：本项目仅用于学术研究和学习目的，请勿直接用于生产环境。医疗数据隐私保护需要更严格的安全审计和合规认证。
+## 📝 项目声明
+
+- **项目名称**：基于同态加密的医疗数据隐私保护预测系统
+- **开发语言**：Python
+- **框架**：Flask
+- **核心技术**：CKKS同态加密、Nesterov加速梯度下降、Sigmoid多项式近似、隐私保护机器学习
