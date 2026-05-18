@@ -363,6 +363,8 @@ CKKS_Logistic_regression_Medical_data_privacy_prediction/
 ## 📝 项目声明
 
 - **项目名称**：基于同态加密的医疗数据隐私保护预测系统
+- **项目作者**：Zhang Jiayu
+- **作者单位**：暨南大学网络空间安全学院
 - **开发语言**：Python
 - **框架**：Flask
 - **核心技术**：CKKS同态加密、Nesterov加速梯度下降、Sigmoid多项式近似、隐私保护机器学习
